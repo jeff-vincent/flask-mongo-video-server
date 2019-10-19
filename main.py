@@ -8,19 +8,14 @@ mongo = PyMongo(app)
 
 @app.route('/')
 def index():
-    return """
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <p><input type=text name=filename>
-        <p><input type=file name=file>
-        <p><input type=submit value="upload file">
-    </form>
-    """
+    return "Server is up."
 
 @app.route('/upload', methods=['POST'])
 def upload():
     filename = request.form['filename']
     file = request.files['file']
-    return mongo.save_file(filename, file)
+    upload = mongo.save_file(filename, file)
+    return str(upload)
 
 @app.route('/download', methods=['POST'])
 def download():
@@ -28,5 +23,5 @@ def download():
     return mongo.send_file(filename)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
 
