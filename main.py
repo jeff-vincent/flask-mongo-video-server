@@ -1,8 +1,9 @@
 from flask import Flask, request
 from flask_pymongo import PyMongo
+from local_config import MONGO_CONNECTION_STRING
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = 'mongodb+srv://jeff:AsspWord@cluster0-intvw.mongodb.net/test?retryWrites=true&w=majority'
+app.config['MONGO_URI'] = MONGO_CONNECTION_STRING
 app.config['DEBUG'] = True
 mongo = PyMongo(app)
 
