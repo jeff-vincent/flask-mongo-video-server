@@ -1,28 +1,36 @@
-from flask import Flask, request, session
+from flask import Flask, request, session, Response, stream_with_context
 from flask_pymongo import PyMongo
 from celery import Celery
 from local_config import MONGO_CONNECTION_STRING
+from gridfs import GridFSBucket
 
 app = Flask(__name__)
 app.secret_key = 'IsItSecret?IsItSafe?'
 app.config['MONGO_URI'] = MONGO_CONNECTION_STRING
 app.config['DEBUG'] = True
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 
 mongo = PyMongo(app)
 
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.conf.update(app.config)
-
 @app.route('/')
 def index():
-    return "Server is up."
+    return """
+        <b>Enter the name of the video you want to stream:</b>
+        <form action="/stream" method="post">
+            <p><input type=text name=filename>
+            <p><input type=submit value="watch a video">
+        </form>
+        <b>The video's name. (Be sure to include ".mp4"):</b>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <p><input type=text name=filename>
+            <p><input type=file name=file>
+            <p><input type=submit value="upload file">
+        </form>
+        """
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    filename = request.form['filename']
     file = request.files['file']
+    filename = request.form['filename']
     upload = mongo.save_file(filename, file)
     return str(upload)
 
@@ -31,18 +39,25 @@ def download():
     filename = request.form['filename']
     return mongo.send_file(filename)
 
-@app.route('/stream', methods=['GET', 'POST'])
-def stream():
+@app.route('/stream', methods=['POST', 'GET'])
+def get_stream():
     if request.method == 'POST':
-        filename = request.form['filename']
-        session['filename'] = filename
+        session['filename'] = request.form['filename']
+        db = mongo.cx.get_database('test')
+        fs = GridFSBucket(db)
+        grid_out = fs.open_download_stream_by_name(session['filename'])
+        contents = grid_out.read()
+        return Response(contents, mimetype='video/mp4')
     else:
-        filename = session['filename']
-    chunk = mongo.db.fs.chunks.find_one()
-    print(chunk)
-    return str(chunk)
-
+        db = mongo.cx.get_database('test')
+        fs = GridFSBucket(db)
+        grid_out = fs.open_download_stream_by_name(session['filename'])
+        contents = grid_out.read()
+        return Response(contents, mimetype='video/mp4')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
+
+
 
