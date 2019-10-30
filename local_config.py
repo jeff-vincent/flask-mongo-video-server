@@ -1,0 +1,1 @@
+MONGO_CONNECTION_STRING = 'mongodb+srv://jeff:AsspWord@cluster0-intvw.mongodb.net/test?retryWrites=true&w=majority'
