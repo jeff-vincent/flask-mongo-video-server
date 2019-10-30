@@ -1,6 +1,5 @@
 from flask import Flask, request, session, Response, stream_with_context
 from flask_pymongo import PyMongo
-from celery import Celery
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
 
