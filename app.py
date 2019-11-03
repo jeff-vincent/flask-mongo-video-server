@@ -1,4 +1,4 @@
-from flask import Flask, request, session, Response, stream_with_context
+from flask import Flask, request, session, Response, stream_with_context, jsonify
 from flask_pymongo import PyMongo
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
@@ -39,15 +39,12 @@ def index():
         <form action="/logout" method="get">
             <p><input type=submit value="logout">
         </form>
+        <form action="/get-current-users-files" method="get">
+            <p><input type=submit value="Get Your Files">
+        </form>
+
         """
 
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    file = request.files['file']
-    filename = file.filename
-    upload = mongo.save_file(filename, file)
-    return str(upload)
 
 
 @app.route('/signup', methods=['POST'])
@@ -76,7 +73,7 @@ def login():
     try:
         user = mongo.db.user.find_one({'username': username})
         if check_password_hash(user['password'],  password):
-            session['logged_in'] = True
+            session['username'] = username
             return 'Logged in user: {}'.format(user['username'])
         return 'Please log in.'
     except Exception as e:
@@ -85,8 +82,22 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    session['logged_in'] = False
+    session['username'] = ''
     return 'Logout successful.'
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+
+    if session['username']:
+        file = request.files['file']
+        filename = file.filename
+        kwargs = {
+            'username': session['username']
+        }
+        upload = mongo.save_file(filename, file, **kwargs)
+        return str(upload)
+    return 'Please log in.'
 
 
 @app.route('/download', methods=['POST'])
@@ -96,7 +107,7 @@ def download():
 
 @app.route('/stream', methods=['POST', 'GET'])
 def get_stream():
-    if session['logged_in'] == True:
+    if session['username']:
         if request.method == 'POST':
             session['filename'] = request.form['filename']
             fs = GridFSBucket(mongo.db)
@@ -110,6 +121,17 @@ def get_stream():
             return Response(contents, mimetype='video/mp4')
 
     return 'Please log in.'
+
+@app.route('/get-current-users-files', methods=['GET'])
+def get_my_files():
+    file_list = []
+    if session['username']:
+        my_files = mongo.db.fs.files.find({'username': session['username']})
+        for file in my_files:
+            file_list.append(file['filename'])
+            file_string = '; '.join(file_list)
+
+        return file_string
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
