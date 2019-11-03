@@ -2,6 +2,7 @@ from flask import Flask, request, session, Response, stream_with_context
 from flask_pymongo import PyMongo
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'IsItSecret?IsItSafe?'
@@ -18,17 +19,18 @@ def index():
             <p><input type=text name=filename>
             <p><input type=submit value="watch a video">
         </form>
-        <b>The video's name. (Be sure to include ".mp4"):</b>
+        <b>Upload a video:</b>
         <form action="/upload" method="post" enctype="multipart/form-data">
-            <p><input type=text name=filename>
             <p><input type=file name=file>
             <p><input type=submit value="upload file">
         </form>
+        <b>Sign Up:</b>
         <form action="/signup" method="post">
             <p><input type=text name=username>
             <p><input type=text name=password>
             <p><input type=submit value="signup">
         </form>
+        <b>Login:</b>
         <form action="/login" method="post">
             <p><input type=text name=username>
             <p><input type=text name=password>
@@ -43,7 +45,7 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['file']
-    filename = request.form['filename']
+    filename = file.filename
     upload = mongo.save_file(filename, file)
     return str(upload)
 
@@ -52,8 +54,15 @@ def upload():
 def signup():
     username = request.form.get('username')
     password = request.form.get('password')
+
+    hashed_password = generate_password_hash(password)
+
+    user = mongo.db.user.find_one({'username': username})
+
+    if user:
+        return 'Username taken. Please choose a different username.'
     
-    user_id = mongo.db.user.insert({'username': username, 'password': password})
+    user_id = mongo.db.user.insert({'username': username, 'password': hashed_password})
 
     return 'Created user: {} -- ID: {}'.format(username, user_id)
 
@@ -66,9 +75,10 @@ def login():
 
     try:
         user = mongo.db.user.find_one({'username': username})
-        if user['password'] == password:
+        if check_password_hash(user['password'],  password):
             session['logged_in'] = True
             return 'Logged in user: {}'.format(user['username'])
+        return 'Please log in.'
     except Exception as e:
         return 'Login failed: ' + (str(e))
 
