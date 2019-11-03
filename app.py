@@ -24,7 +24,21 @@ def index():
             <p><input type=file name=file>
             <p><input type=submit value="upload file">
         </form>
+        <form action="/signup" method="post">
+            <p><input type=text name=username>
+            <p><input type=text name=password>
+            <p><input type=submit value="signup">
+        </form>
+        <form action="/login" method="post">
+            <p><input type=text name=username>
+            <p><input type=text name=password>
+            <p><input type=submit value="login">
+        </form>
+        <form action="/logout" method="get">
+            <p><input type=submit value="logout">
+        </form>
         """
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -33,6 +47,38 @@ def upload():
     upload = mongo.save_file(filename, file)
     return str(upload)
 
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    user_id = mongo.db.user.insert({'username': username, 'password': password})
+
+    return 'Created user: {} -- ID: {}'.format(username, user_id)
+
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    try:
+        user = mongo.db.user.find_one({'username': username})
+        if user['password'] == password:
+            session['logged_in'] = True
+            return 'Logged in user: {}'.format(user['username'])
+    except Exception as e:
+        return 'Login failed: ' + (str(e))
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session['logged_in'] = False
+    return 'Logout successful.'
+
+
 @app.route('/download', methods=['POST'])
 def download():
     filename = request.form['filename']
@@ -40,19 +86,20 @@ def download():
 
 @app.route('/stream', methods=['POST', 'GET'])
 def get_stream():
-    if request.method == 'POST':
-        session['filename'] = request.form['filename']
-        db = mongo.cx.get_database('test')
-        fs = GridFSBucket(db)
-        grid_out = fs.open_download_stream_by_name(session['filename'])
-        contents = grid_out.read()
-        return Response(contents, mimetype='video/mp4')
-    else:
-        db = mongo.cx.get_database('test')
-        fs = GridFSBucket(db)
-        grid_out = fs.open_download_stream_by_name(session['filename'])
-        contents = grid_out.read()
-        return Response(contents, mimetype='video/mp4')
+    if session['logged_in'] == True:
+        if request.method == 'POST':
+            session['filename'] = request.form['filename']
+            fs = GridFSBucket(mongo.db)
+            grid_out = fs.open_download_stream_by_name(session['filename'])
+            contents = grid_out.read()
+            return Response(contents, mimetype='video/mp4')
+        else:
+            fs = GridFSBucket(mongo.db)
+            grid_out = fs.open_download_stream_by_name(session['filename'])
+            contents = grid_out.read()
+            return Response(contents, mimetype='video/mp4')
+
+    return 'Please log in.'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
