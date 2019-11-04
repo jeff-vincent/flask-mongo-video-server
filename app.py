@@ -28,7 +28,7 @@ def index():
             <p><input type=file name=file>
             <p><input type=submit value="Upload Movie">
         </form>
-        <div style="background-color: blue; border-radius: 5px">
+        <div style="background-color: #707bb2; border-radius: 5px; padding: 15px; width: 180px">
         <b>Sign Up:</b>
         <form action="/signup" method="post">
             <p><input type=text name=username>
