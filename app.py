@@ -65,7 +65,11 @@ def signup():
     
     user_id = mongo.db.user.insert({'username': username, 'password': hashed_password})
 
-    return 'Created user: {} -- ID: {}'.format(username, user_id)
+    data = {}
+
+    data['username'] = username
+    data['user_id'] = user_id
+    return jsonify(data)
 
 
 
