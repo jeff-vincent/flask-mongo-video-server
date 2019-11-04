@@ -1,4 +1,4 @@
-from flask import Flask, request, session, Response, stream_with_context, jsonify
+from flask import Flask, request, session, Response, jsonify
 from flask_pymongo import PyMongo
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
@@ -46,18 +46,22 @@ def index():
         """
 
 
-
 @app.route('/signup', methods=['POST'])
 def signup():
-    username = request.form.get('username')
-    password = request.form.get('password')
+
+    try:
+        username = request.form.get('username')
+        password = request.form.get('password')
+    
+    except Exception as e:
+        return 'There was a problem parsing your request. Error message: {}'.format(str(e))
 
     hashed_password = generate_password_hash(password)
 
     user = mongo.db.user.find_one({'username': username})
 
     if user:
-        return 'Username taken. Please choose a different username.'
+        return 'Sorry, but that username is already taken. Please choose a different username.'
     
     user_id = mongo.db.user.insert({'username': username, 'password': hashed_password})
 
@@ -67,8 +71,13 @@ def signup():
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
+    try:
+        username = request.form.get('username')
+        password = request.form.get('password')
+    
+    except Exception as e:
+        return 'There was a problem parsing your request. Error message: {}'.format(str(e))
+
 
     try:
         user = mongo.db.user.find_one({'username': username})
@@ -88,16 +97,18 @@ def logout():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-
-    if session['username']:
-        file = request.files['file']
-        filename = file.filename
-        kwargs = {
-            'username': session['username']
-        }
-        upload = mongo.save_file(filename, file, **kwargs)
-        return str(upload)
-    return 'Please log in.'
+    try:
+        if session['username']:
+            file = request.files['file']
+            filename = file.filename
+            kwargs = {
+                'username': session['username']
+            }
+            upload = mongo.save_file(filename, file, **kwargs)
+            return str(upload)
+        return 'Please log in.'
+    except Exception as e:
+        return 'There was a problem handling your request. Error message: '.format(str(e))
 
 
 @app.route('/download', methods=['POST'])
@@ -107,31 +118,45 @@ def download():
 
 @app.route('/stream', methods=['POST', 'GET'])
 def get_stream():
-    if session['username']:
-        if request.method == 'POST':
-            session['filename'] = request.form['filename']
-            fs = GridFSBucket(mongo.db)
-            grid_out = fs.open_download_stream_by_name(session['filename'])
-            contents = grid_out.read()
-            return Response(contents, mimetype='video/mp4')
-        else:
-            fs = GridFSBucket(mongo.db)
-            grid_out = fs.open_download_stream_by_name(session['filename'])
-            contents = grid_out.read()
-            return Response(contents, mimetype='video/mp4')
+    try:
+        if session['username']:
+            if request.method == 'POST':
+                session['filename'] = request.form['filename']
+                fs = GridFSBucket(mongo.db)
+                grid_out = fs.open_download_stream_by_name(session['filename'])
+                contents = grid_out.read()
+                return Response(contents, mimetype='video/mp4')
+            else:
+                fs = GridFSBucket(mongo.db)
+                grid_out = fs.open_download_stream_by_name(session['filename'])
+                contents = grid_out.read()
+                return Response(contents, mimetype='video/mp4')
 
-    return 'Please log in.'
+        return 'Please log in.'
+    except Exception as e:
+        return 'There was an error handling your request. Error message: {}'.format(str(e))
 
 @app.route('/get-current-users-files', methods=['GET'])
-def get_my_files():
-    file_list = []
-    if session['username']:
-        my_files = mongo.db.fs.files.find({'username': session['username']})
-        for file in my_files:
-            file_list.append(file['filename'])
-            file_string = '; '.join(file_list)
+def get_current_users_files():
+    data = {}
+    try:
+        if session['username']:
+            my_files = mongo.db.fs.files.find({'username': session['username']})
+            for file in my_files:
 
-        return file_string
+                data[file['filename']] = {
+                    'filename': file['filename'],
+                    'username': file['username'],
+                    'contentType': file['contentType'],
+                    'md5': file['md5'],
+                    'chunkSize': file['chunkSize'],
+                    'length': file['length'],
+                    'uploadDate': file['uploadDate']
+                }
+
+            return jsonify(data)
+    except Exception as e:
+        return str(e)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
