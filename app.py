@@ -164,6 +164,7 @@ def get_current_users_files():
                 }
 
             return jsonify(data)
+        return 'Please log in.'
     except Exception as e:
         return str(e)
 
