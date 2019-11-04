@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
 from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'IsItSecret?IsItSafe?'
@@ -63,12 +64,16 @@ def signup():
     if user:
         return 'Sorry, but that username is already taken. Please choose a different username.'
     
-    user_id = mongo.db.user.insert({'username': username, 'password': hashed_password})
+    user_id = mongo.db.user.insert({'username': username,   
+                                    'password': hashed_password,
+                                    'date_joined': datetime.datetime.utcnow()})
 
-    data = {}
+    user = mongo.db.user.find_one({'username': username})
+    data = {
+    'username': user['username'],
+    'date_joined': user['date_joined'],
+    }
 
-    data['username'] = username
-    data['user_id'] = user_id
     return jsonify(data)
 
 
