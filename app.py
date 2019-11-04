@@ -15,34 +15,35 @@ mongo = PyMongo(app)
 @app.route('/')
 def index():
     return """
-        <b>Enter the name of the video you want to stream:</b>
+        <b>Enter the name of the movie you want to stream:</b>
         <form action="/stream" method="post">
             <p><input type=text name=filename>
-            <p><input type=submit value="watch a video">
+            <p><input type=submit value="Play">
+        </form>
+        <form action="/get-current-users-files" method="get">
+            <p><input type=submit value="Your Movie Library">
         </form>
         <b>Upload a video:</b>
         <form action="/upload" method="post" enctype="multipart/form-data">
             <p><input type=file name=file>
-            <p><input type=submit value="upload file">
+            <p><input type=submit value="Upload Movie">
         </form>
         <b>Sign Up:</b>
         <form action="/signup" method="post">
             <p><input type=text name=username>
             <p><input type=text name=password>
-            <p><input type=submit value="signup">
+            <p><input type=submit value="Sign-up">
         </form>
         <b>Login:</b>
         <form action="/login" method="post">
             <p><input type=text name=username>
             <p><input type=text name=password>
-            <p><input type=submit value="login">
+            <p><input type=submit value="Login">
         </form>
         <form action="/logout" method="get">
-            <p><input type=submit value="logout">
+            <p><input type=submit value="Logout">
         </form>
-        <form action="/get-current-users-files" method="get">
-            <p><input type=submit value="Get Your Files">
-        </form>
+
 
         """
 
@@ -70,9 +71,9 @@ def signup():
 
     user = mongo.db.user.find_one({'username': username})
     data = {
-    'username': user['username'],
-    'date_joined': user['date_joined'],
-    }
+        'username': user['username'],
+        'date_joined': user['date_joined'],
+        }
 
     return jsonify(data)
 
