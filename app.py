@@ -26,8 +26,8 @@ def index():
         </div>
         <b style="margin-left:15px">Add to your movie library: </b>
         <form style="margin-left:15px" action="/upload" method="post" enctype="multipart/form-data">
-            <p><input type=file name=file>
-            <p><input type=submit value="Upload Movie">
+            <p><input type=file name=file value="Pick a Movie">
+            <p><input type=submit value="Upload">
         </form>
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <b>Sign Up:</b>
