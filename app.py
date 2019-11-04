@@ -15,6 +15,7 @@ mongo = PyMongo(app)
 @app.route('/')
 def index():
     return """
+        <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <b>Enter the name of the movie you want to stream:</b>
         <form action="/stream" method="post">
             <p><input type=text name=filename>
@@ -23,12 +24,13 @@ def index():
         <form action="/get-current-users-files" method="get">
             <p><input type=submit value="Your Movie Library">
         </form>
-        <b>Upload a video:</b>
-        <form action="/upload" method="post" enctype="multipart/form-data">
+        </div>
+        <b style="margin-left:15px">Upload a video:</b>
+        <form style="margin-left:15px" action="/upload" method="post" enctype="multipart/form-data">
             <p><input type=file name=file>
             <p><input type=submit value="Upload Movie">
         </form>
-        <div style="background-color: #707bb2; border-radius: 5px; padding: 15px; width: 180px">
+        <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <b>Sign Up:</b>
         <form action="/signup" method="post">
             <p><input type=text name=username>
