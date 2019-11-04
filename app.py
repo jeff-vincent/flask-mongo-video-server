@@ -17,14 +17,14 @@ def index():
     return """
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <form action="/stream" method="post">
-            <p><input type=text name=filename hint="filename in your movie library">
+            <p><input type=text name=filename label=filename>
             <p><input type=submit value="Play">
         </form>
         <form action="/get-current-users-files" method="get">
             <p><input type=submit value="Your Movie Library">
         </form>
         </div>
-        <b style="margin-left:15px">Upload a video:</b>
+        <b style="margin-left:15px">Add to your movie library: </b>
         <form style="margin-left:15px" action="/upload" method="post" enctype="multipart/form-data">
             <p><input type=file name=file>
             <p><input type=submit value="Upload Movie">
