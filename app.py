@@ -17,7 +17,7 @@ def index():
     return """
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <form action="/stream" method="post">
-            <p><input type=text name=filename label=filename>
+            <p><input type=text name=filename placeholder=" filename...">
             <p><input type=submit value="Play">
         </form>
         <form action="/get-current-users-files" method="get">
