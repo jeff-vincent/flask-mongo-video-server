@@ -24,8 +24,8 @@ def index():
             <p><input type=submit value="Your Movie Library">
         </form>
         </div>
-        <b style="margin-left:15px">Add to your movie library: </b>
-        <form style="margin-left:15px" action="/upload" method="post" enctype="multipart/form-data">
+        <b style="margin-left:30px">Add to your movie library: </b>
+        <form style="margin-left:30px" action="/upload" method="post" enctype="multipart/form-data">
             <p><input type=file name=file value="Pick a Movie">
             <p><input type=submit value="Upload">
         </form>
