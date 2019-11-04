@@ -16,9 +16,8 @@ mongo = PyMongo(app)
 def index():
     return """
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
-        <b>Enter the name of the movie you want to stream:</b>
         <form action="/stream" method="post">
-            <p><input type=text name=filename>
+            <p><input type=text name=filename hint="filename in your movie library">
             <p><input type=submit value="Play">
         </form>
         <form action="/get-current-users-files" method="get">
