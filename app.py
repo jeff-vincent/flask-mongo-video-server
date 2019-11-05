@@ -179,7 +179,7 @@ def get_current_users_files():
             return jsonify(data)
         return 'Please log in.'
     except Exception as e:
-        return str(e)
+        return 'Please log in.'
 
 @app.route('/get-public-files', methods=['GET'])
 def get_public_files():
@@ -202,7 +202,7 @@ def get_public_files():
             return jsonify(data)
         return 'Please log in.'
     except Exception as e:
-        return str(e)
+        return 'Please log in.'
 
 
 if __name__ == '__main__':
