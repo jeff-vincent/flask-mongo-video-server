@@ -21,12 +21,16 @@ def index():
             <p><input type=submit value="Play">
         </form>
         <form action="/get-current-users-files" method="get">
-            <p><input type=submit value="Your Movie Library">
+            <p><input type=submit value="Your Video Library">
+        </form>
+        <form action="/get-public-files" method="get">
+            <p><input type=submit value="Public Videos">
         </form>
         </div>
-        <b style="margin-left:25px">Add to your movie library: </b>
+        <b style="margin-left:25px">Add to your video library: </b>
         <form style="margin-left:30px" action="/upload" method="post" enctype="multipart/form-data">
             <p><input type=file name=file value="Pick a Movie">
+            <p><input type=checkbox name=public> Make public</br>
             <p><input type=submit value="Upload">
         </form>
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
@@ -113,9 +117,14 @@ def upload():
     try:
         if session['username']:
             file = request.files['file']
+            if request.form.get('public'):
+                public = True
+            else:
+                public = False
             filename = file.filename
             kwargs = {
-                'username': session['username']
+                'username': session['username'],
+                'public': public
             }
             upload = mongo.save_file(filename, file, **kwargs)
             return str(upload)
@@ -171,6 +180,30 @@ def get_current_users_files():
         return 'Please log in.'
     except Exception as e:
         return str(e)
+
+@app.route('/get-public-files', methods=['GET'])
+def get_public_files():
+    data = {}
+    try:
+        if session['username']:
+            my_files = mongo.db.fs.files.find({'public': True})
+            for file in my_files:
+
+                data[file['filename']] = {
+                    'filename': file['filename'],
+                    'username': file['username'],
+                    'contentType': file['contentType'],
+                    'md5': file['md5'],
+                    'chunkSize': file['chunkSize'],
+                    'length': file['length'],
+                    'uploadDate': file['uploadDate']
+                }
+
+            return jsonify(data)
+        return 'Please log in.'
+    except Exception as e:
+        return str(e)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
