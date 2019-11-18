@@ -1,4 +1,4 @@
-# file-store
+# flask-mongo-video-server
 
 A Flask-PyMongo exploration. 
 
