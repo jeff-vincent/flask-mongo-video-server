@@ -57,8 +57,8 @@ def index():
 def signup():
 
     try:
-        username = request.json.get('username')
-        password = request.json.get('password')
+        username = request.form.get('username')
+        password = request.form.get('password')
     
     except Exception as e:
         return 'There was a problem parsing your request. Error message: {}'.format(str(e))
@@ -87,8 +87,8 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        username = request.json.get('username')
-        password = request.json.get('password')
+        username = request.form.get('username')
+        password = request.form.get('password')
     
     except Exception as e:
         return 'There was a problem parsing your request. Error message: {}'.format(str(e))
