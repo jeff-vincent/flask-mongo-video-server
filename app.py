@@ -1,4 +1,4 @@
-from flask import Flask, request, session, Response, jsonify
+from flask import Flask, request, session, Response, jsonify, render_template
 from flask_pymongo import PyMongo
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
@@ -14,7 +14,7 @@ mongo = PyMongo(app)
 
 @app.route('/')
 def index():
-    return """
+        return """
         <div style="background-color: #707bb2; margin: 15px; border-radius: 5px; padding: 15px; width: 180px">
         <form action="/stream" method="post">
             <p><input type=text name=filename placeholder=" filename...">
@@ -50,8 +50,6 @@ def index():
             <p><input type=submit value="Logout">
         </form>
         </div>
-
-
         """
 
 
@@ -59,8 +57,8 @@ def index():
 def signup():
 
     try:
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.json.get('username')
+        password = request.json.get('password')
     
     except Exception as e:
         return 'There was a problem parsing your request. Error message: {}'.format(str(e))
@@ -89,8 +87,8 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.json.get('username')
+        password = request.json.get('password')
     
     except Exception as e:
         return 'There was a problem parsing your request. Error message: {}'.format(str(e))
