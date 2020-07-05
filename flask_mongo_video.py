@@ -1,4 +1,4 @@
-from flask import Flask, request, session, Response, jsonify, render_template
+from flask import Flask, request, session
 from local_config import MONGO_CONNECTION_STRING
 from gridfs import GridFSBucket
 from flask_pymongo import PyMongo

@@ -1,4 +1,4 @@
-from flask import session, Response, jsonify, render_template
+from flask import session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 

@@ -1,4 +1,4 @@
-from flask import session, Response, jsonify, render_template
+from flask import session, Response, jsonify
 from gridfs import GridFSBucket
 
 class VideoManagement:
