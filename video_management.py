@@ -1,7 +1,6 @@
 from flask import session, Response, jsonify, render_template
 from gridfs import GridFSBucket
 
-
 class VideoManagement:
     def __init__(self, request, mongo):
         self.request = request
