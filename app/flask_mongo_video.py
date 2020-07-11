@@ -17,6 +17,7 @@ app.config['CELERY_BROKER_URL'] = 'amqp://jdv:jdv@localhost:5672/v_host'
 mongo = PyMongo(app)
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
+long_task = Celery(app.name, broker='amqp://guest:guest@localhost:5672/v_host')
 
 @celery.task
 @app.route('/')
@@ -57,20 +58,20 @@ def get_public_files():
     result = video_management.get_public_files()
     return result
 
-@celery.task
+@long_task.task
 @app.route('/upload', methods=['POST'])
 def upload():
     video_management = VideoManagement(request, mongo)
     result = video_management.upload()
     return result
 
-@celery.task
+@long_task.task
 @app.route('/download', methods=['POST'])
 def download():
     filename = request.form['filename']
     return mongo.send_file(filename)
 
-@celery.task
+@long_task.task
 @app.route('/stream', methods=['POST', 'GET'])
 def get_stream():
     video_management = VideoManagement(request, mongo)
@@ -78,7 +79,7 @@ def get_stream():
     return result
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5000)
 
 
 
