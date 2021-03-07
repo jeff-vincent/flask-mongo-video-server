@@ -19,7 +19,7 @@ class UserManagement:
         user = self.mongo.db.user.find_one({'username': username})
         if user:
             return 'Sorry, but that username is already taken.\
-             Please choose a different username.'
+            Please choose a different username.'
         user_id = self.mongo.db.user.insert({'username': username,   
                                         'password': hashed_password,
                                         'date_joined': datetime.datetime.utcnow()})

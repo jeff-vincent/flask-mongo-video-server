@@ -1,8 +1,7 @@
-FROM jdvincent/ubuntu-python3.8
-COPY requirements.txt /tmp/
-RUN apt-get update \
-&& apt-get install python3-pip -y
-RUN pip3 install -r /tmp/requirements.txt
+FROM python:3.9
+RUN mkdir /temp
+COPY requirements.txt /temp
+RUN pip install -r /temp/requirements.txt
 RUN rm -rf /temp
-COPY . /app
-CMD python3.8 /app/app/flask_mongo_video.py
+RUN mkdir /app
+COPY ./app /app
