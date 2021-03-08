@@ -1,5 +1,9 @@
 # flask-mongo-video-server
 
-A Flask-PyMongo exploration. 
+Upload and stream .mp4 files.
 
-Live demo: https://desolate-ocean-64699.herokuapp.com/
+## Run in Docker
+
+`docker-compose -f flask_mongo_video.yml up`
+
+The app will be running at `localhost:5001`, and mongo express will be available at `localhost:8081`
