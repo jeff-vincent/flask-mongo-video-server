@@ -1,10 +1,13 @@
-from flask import session, Response, jsonify
+from flask import jsonify
+from flask import session
+from flask import Response
 from gridfs import GridFSBucket
 
 class VideoManagement:
     def __init__(self, request, mongo):
         self.request = request
         self.mongo = mongo
+        self.fs = GridFSBucket(mongo.db)
 
 
     def upload(self):
@@ -20,12 +23,12 @@ class VideoManagement:
                     'username': session['username'],
                     'public': public
                 }
-                upload = self.mongo.save_file(filename, file, **kwargs)
-                return str(upload)
+                upload_id = self.mongo.save_file(filename, file, **kwargs)
+                return str(upload_id)
             return 'Please log in.'
         except Exception as e:
             return 'There was a problem handling your request.\
-            Error message: '.format(str(e))
+            Error message: {}'.format(str(e))
 
 
     def get_public_files(self):
@@ -48,7 +51,8 @@ class VideoManagement:
                 return jsonify(data)
             return 'Please log in.'
         except Exception as e:
-            return 'Please log in.'
+            return 'There was a problem handling your request.\
+            Error message: {}'.format(str(e))
 
 
     def get_stream(self):
@@ -56,13 +60,11 @@ class VideoManagement:
             if session['username']:
                 if self.request.method == 'POST':
                     session['filename'] = self.request.form['filename']
-                    fs = GridFSBucket(self.mongo.db)
-                    grid_out = fs.open_download_stream_by_name(session['filename'])
+                    grid_out = self.fs.open_download_stream_by_name(session['filename'])
                     contents = grid_out.read()
                     return Response(contents, mimetype='video/mp4')
                 else:
-                    fs = GridFSBucket(self.mongo.db)
-                    grid_out = fs.open_download_stream_by_name(session['filename'])
+                    grid_out = self.fs.open_download_stream_by_name(session['filename'])
                     contents = grid_out.read()
                     return Response(contents, mimetype='video/mp4')
 

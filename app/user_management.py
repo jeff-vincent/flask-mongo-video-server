@@ -1,6 +1,9 @@
-from flask import session, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
+from flask import jsonify
+from flask import session
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
+
 
 
 class UserManagement:
@@ -20,7 +23,7 @@ class UserManagement:
         if user:
             return 'Sorry, but that username is already taken.\
             Please choose a different username.'
-        user_id = self.mongo.db.user.insert({'username': username,   
+        self.mongo.db.user.insert({'username': username,   
                                         'password': hashed_password,
                                         'date_joined': datetime.datetime.utcnow()})
         user = self.mongo.db.user.find_one({'username': username})
@@ -47,7 +50,7 @@ class UserManagement:
             return 'Please log in.'
         except Exception as e:
 
-            return 'Login failed: ' + (str(e))
+            return 'Login failed: {}'.format(str(e))
 
     def get_users_files(self):
         data = {}
@@ -69,4 +72,5 @@ class UserManagement:
                 return jsonify(data)
             return 'Please log in.'
         except Exception as e:
-            return 'Please log in.'
+            return 'There was a problem handling your request.\
+            Error message: {}'.format(str(e))
