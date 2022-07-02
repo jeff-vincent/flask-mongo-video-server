@@ -1,6 +1,6 @@
 amqp==2.6.0
 billiard==3.6.3.0
-celery==4.4.6
+celery==5.2.2
 click==7.1.2
 dnspython==1.16.0
 Flask==1.1.2
